@@ -43,7 +43,13 @@ class _CarrosListViewState extends State<CarrosListView>
     super.initState();
 
     // lista de carros
-    _model.fetch(tipo); //poderia ser diretamente widget.tipo
+    _fetch(); //poderia ser diretamente widget.tipo
+  }
+
+  //--------------------------------------
+
+  void _fetch() {
+    _model.fetch(tipo);
   }
 
   //--------------------------------------
@@ -58,7 +64,9 @@ class _CarrosListViewState extends State<CarrosListView>
 
         // se houve algum erro na obtenção dos dados, exiba uma mensagem vermelha e centralizada
         if (_model.error != null) {
-          return TextError("Não foi possível buscar os carros");
+          return TextError(
+            "Não foi possível buscar os carros!\n\nClique aqui para tentar novamente.",
+          onPressed: _fetch,);
         }
 
         // se não tiver dados na primeira vez que entrar, mostre uma barra circular de progresso
@@ -141,7 +149,6 @@ class _CarrosListViewState extends State<CarrosListView>
   _onClickCarro(Carro c) {
     push(context, CarroPage(c));
   }
-
 
 /* exemplo de como foi feito anteriormente...
 
