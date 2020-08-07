@@ -13,5 +13,4 @@ class CarrosBloc extends SimpleBloc<List<Carro>> { // alteração na aula 133
       addError(e); // adiciona esse erro para cair no tratamento no StreamBuilder
     }
   }
-
 }
