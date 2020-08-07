@@ -2,10 +2,11 @@ import 'dart:async';
 
 import 'package:carros/pages/carro/carro.dart';
 import 'package:carros/pages/carro/carro_page.dart';
-import 'package:carros/pages/carro/carros_bloc.dart';
+import 'package:carros/pages/carro/carros_model.dart';
 import 'package:carros/utils/nav.dart';
 import 'package:carros/widgets/text_error.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 
 class CarrosListView extends StatefulWidget {
   String tipo;
@@ -23,8 +24,7 @@ class _CarrosListViewState extends State<CarrosListView>
     with AutomaticKeepAliveClientMixin<CarrosListView> {
   // para salvar o estado da tab
 
-  final _bloc = CarrosBloc();
-  List<Carro> carros;
+  final _model = CarrosModel();
 
   //--------------------------------------
 
@@ -43,7 +43,7 @@ class _CarrosListViewState extends State<CarrosListView>
     super.initState();
 
     // lista de carros
-    _bloc.fetch(tipo); //poderia ser diretamente widget.tipo
+    _model.fetch(tipo); //poderia ser diretamente widget.tipo
   }
 
   //--------------------------------------
@@ -52,25 +52,22 @@ class _CarrosListViewState extends State<CarrosListView>
   Widget build(BuildContext context) {
     super.build(context); // para salvar o estado da tab
 
-    return StreamBuilder(
-      // tem como função converter um Future para Widget
-      // fica aguardando retornar para mostrar um widget (não dá pra usar await aqui pois Future não é widget)
-      stream: _bloc.stream,
-      // forma de enviar a modificação a ser feita
-      builder: (BuildContext context, AsyncSnapshot<List<Carro>> snapshot) {
+    return Observer(
+      builder: (BuildContext context) {
+        List<Carro> carros = _model.carros;
+
         // se houve algum erro na obtenção dos dados, exiba uma mensagem vermelha e centralizada
-        if (snapshot.hasError) {
+        if (_model.error != null) {
           return TextError("Não foi possível buscar os carros");
         }
 
         // se não tiver dados na primeira vez que entrar, mostre uma barra circular de progresso
-        if (!snapshot.hasData) {
+        if (carros == null) {
           return Center(
             child: CircularProgressIndicator(),
           );
         }
 
-        List<Carro> carros = snapshot.data;
         return _ListView(carros);
       },
     );
@@ -145,15 +142,6 @@ class _CarrosListViewState extends State<CarrosListView>
     push(context, CarroPage(c));
   }
 
-  //--------------------------------------
-
-  @override
-  void dispose() {
-    super.dispose();
-
-    // fechando o streamController (sempre é necessário)
-    _bloc.dispose();
-  }
 
 /* exemplo de como foi feito anteriormente...
 
